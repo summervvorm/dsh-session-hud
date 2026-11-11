@@ -1,9 +1,6 @@
+# Inserts this bundle's single Host row. The plugin reads no config: every
+# behaviour (counts, alerts, drag position) is driven from session events and
+# the browser, so the row needs nothing beyond its name.
 - insert:
     - id: dsh-session-hud
       name: dsh-session-hud
-      # 三个动效开关，默认全开。写在这里的键会覆盖默认值；不写就保持默认。
-      # 关掉 = 该动效不播（与系统「减少动态效果」等价）。
-      # config:
-      #   expandAnimation: true    # 面板展开/收起过渡
-      #   sessionAlert: true       # 新会话出现在进行中列表时的提醒
-      #   completionAlert: true    # 会话完成时的提醒（提醒行与胶囊徽标）
