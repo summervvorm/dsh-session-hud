@@ -7,8 +7,9 @@
  *   - serve this file and add its URL under Discover → index sources.
  *
  * Usage:  node scripts/make-index.mjs
- * Env:    COMMIT=<sha>            pin a commit other than HEAD
- *         PUBLISH_TIMESTAMP=<sec> override the publish time (Unix seconds)
+ * Env:    SOURCE=npm|git           version source (default npm; git pins a commit)
+ *         COMMIT=<sha>             pin a commit other than HEAD (SOURCE=git only)
+ *         PUBLISH_TIMESTAMP=<sec>  override the publish time (Unix seconds)
  */
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -28,9 +29,17 @@ if (!repositoryUrl.startsWith('https://github.com/')) {
   throw new Error(`repository.url must be a GitHub https URL, got ${JSON.stringify(pkg.repository?.url)}`)
 }
 
-const commit = (process.env.COMMIT ?? execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root }).toString()).trim()
-if (!/^[0-9a-f]{40}$/u.test(commit)) throw new Error(`not a full commit SHA: ${JSON.stringify(commit)}`)
+const sourceKind = (process.env.SOURCE ?? 'npm').toLowerCase()
+if (sourceKind !== 'npm' && sourceKind !== 'git') throw new Error(`SOURCE must be npm or git, got ${sourceKind}`)
+
+const commit = sourceKind === 'git'
+  ? (process.env.COMMIT ?? execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root }).toString()).trim()
+  : undefined
+if (commit !== undefined && !/^[0-9a-f]{40}$/u.test(commit)) throw new Error(`not a full commit SHA: ${JSON.stringify(commit)}`)
 const publishTimestamp = Number(process.env.PUBLISH_TIMESTAMP ?? Math.floor(Date.now() / 1000))
+const source = sourceKind === 'npm'
+  ? { type: 'npm' }
+  : { type: 'git', url: repositoryUrl, commit }
 
 const index = {
   format: 1,
@@ -65,7 +74,7 @@ const index = {
         {
           version: pkg.version,
           publishTimestamp,
-          source: { type: 'git', url: repositoryUrl, commit },
+          source,
           engines: pkg.engines?.dsh === undefined ? {} : { dsh: pkg.engines.dsh },
         },
       ],
@@ -75,4 +84,4 @@ const index = {
 
 mkdirSync(join(root, 'docs'), { recursive: true })
 writeFileSync(join(root, 'docs/index.json'), `${JSON.stringify(index, null, 2)}\n`, 'utf8')
-console.log(`docs/index.json → ${pkg.name}@${pkg.version} @ ${commit.slice(0, 7)}`)
+console.log(`docs/index.json → ${pkg.name}@${pkg.version} (${sourceKind}${commit === undefined ? '' : ` @ ${commit.slice(0, 7)}`})`)
