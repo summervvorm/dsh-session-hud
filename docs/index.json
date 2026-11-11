@@ -77,11 +77,11 @@
       "versions": [
         {
           "version": "1.0.0",
-          "publishTimestamp": 1794381866,
+          "publishTimestamp": 1794382102,
           "source": {
             "type": "git",
             "url": "https://github.com/summervvorm/dsh-session-hud",
-            "commit": "9284863af5677c366cf25035afe9345fe7881706"
+            "commit": "156f432a26ee0d9a752df08987242110816a53ff"
           },
           "engines": {
             "dsh": ">=0.2.1-rc.5"
