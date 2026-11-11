@@ -1,0 +1,93 @@
+{
+  "format": 1,
+  "title": {
+    "en": "DeepSeek Harness — community index",
+    "zh": "DeepSeek Harness — 社区插件索引"
+  },
+  "description": {
+    "en": "Self-published entries for plugins that follow the format-1 market index.",
+    "zh": "按市场价格索引格式 1 自发布的插件条目。"
+  },
+  "metadata": {
+    "categories": {
+      "ui": {
+        "title": {
+          "en": "Interface",
+          "zh": "界面"
+        }
+      }
+    },
+    "labels": {
+      "web": {
+        "title": {
+          "en": "Web UI",
+          "zh": "网页界面"
+        }
+      },
+      "sessions": {
+        "title": {
+          "en": "Sessions",
+          "zh": "会话"
+        }
+      },
+      "notifications": {
+        "title": {
+          "en": "Notifications",
+          "zh": "提醒"
+        }
+      }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-session-hud",
+      "title": {
+        "en": "Session Status HUD",
+        "zh": "会话状态看板"
+      },
+      "description": {
+        "en": "A floating panel at the top-right that counts running, waiting and finished sessions, and clears each completion alert once you open that session.",
+        "zh": "在右上角浮出一个面板：当前几个会话进行中、几个等待确认、共几个已完成；打开某个会话，它的完成提醒立刻消失。"
+      },
+      "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJTZXNzaW9uIHN0YXR1cyBIVUQiPgogIDxyZWN0IHg9IjUiIHk9IjExIiB3aWR0aD0iNTQiIGhlaWdodD0iNDIiIHJ4PSIxMSIgZmlsbD0iIzJmNmZkYiIgb3BhY2l0eT0iMC4xMiIvPgogIDxyZWN0IHg9IjUiIHk9IjExIiB3aWR0aD0iNTQiIGhlaWdodD0iNDIiIHJ4PSIxMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmY2ZmRiIiBzdHJva2Utd2lkdGg9IjMiLz4KICA8Y2lyY2xlIGN4PSIxOSIgY3k9IjI1IiByPSI1IiBmaWxsPSIjMmY2ZmRiIi8+CiAgPGNpcmNsZSBjeD0iMTkiIGN5PSIyNSIgcj0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmY2ZmRiIiBzdHJva2Utd2lkdGg9IjEuNSIgb3BhY2l0eT0iMC40NSIvPgogIDxyZWN0IHg9IjMxIiB5PSIyMSIgd2lkdGg9IjE4IiBoZWlnaHQ9IjciIHJ4PSIzLjUiIGZpbGw9IiMyZjZmZGIiIG9wYWNpdHk9IjAuNTUiLz4KICA8cmVjdCB4PSIxNSIgeT0iMzkiIHdpZHRoPSIyMCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJmOWU2MiIgb3BhY2l0eT0iMC45Ii8+CiAgPHJlY3QgeD0iMTUiIHk9IjM5IiB3aWR0aD0iMzQiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJmOWU2MiIgc3Ryb2tlLXdpZHRoPSIxLjIiIG9wYWNpdHk9IjAuNCIvPgo8L3N2Zz4K",
+      "author": "summervvorm",
+      "homepage": "https://github.com/summervvorm/dsh-session-hud#readme",
+      "repository": {
+        "url": "https://github.com/summervvorm/dsh-session-hud"
+      },
+      "metadata": {
+        "category": "ui",
+        "keywords": [
+          "deepseek-harness",
+          "dsh",
+          "dsh-plugin",
+          "dsh-bundle",
+          "session",
+          "status",
+          "hud",
+          "overlay",
+          "web-ui"
+        ],
+        "labels": [
+          "web",
+          "sessions",
+          "notifications"
+        ]
+      },
+      "versions": [
+        {
+          "version": "1.0.0",
+          "publishTimestamp": 1794381866,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/summervvorm/dsh-session-hud",
+            "commit": "9284863af5677c366cf25035afe9345fe7881706"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.5"
+          }
+        }
+      ]
+    }
+  ]
+}

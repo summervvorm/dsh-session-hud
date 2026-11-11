@@ -52,6 +52,22 @@ plugin_manager: install_bundle, target = <本仓库绝对路径>
 
 安装后 `cordis.patch.yml` 会插入一行 `dsh-session-hud`，Web UI 加载其客户端半个插件。
 
+## 插件市场
+
+本仓库自带 `docs/index.json` —— 一份 **插件市场索引格式 1**（`format: 1`）的文档，包含本插件一个版本条目：
+
+- 已用官方 `@deepseek-ai/dsh-plugin-market-index` 的 `parseMarketIndex` 校验通过；
+- `versions[0].source` 是 **commit 锁定** 的 Git 源，安装参数为
+  `git+https://github.com/summervvorm/dsh-session-hud.git#<commit>`。
+
+两种用法：
+
+1. **立即生效**：把下面这个 URL 加进 Discover 的索引源（设置 → 插件 → 索引），就能在 Discover 里看到并安装
+   `https://raw.githubusercontent.com/summervvorm/dsh-session-hud/main/docs/index.json`
+2. **投稿到官方索引**：把 `plugins[0]` 这一条并入官方索引文档即可，字段与官方生成器一致。
+
+发新版本时：改 `package.json` 的 `version` → `node scripts/make-index.mjs` → 提交并推送。脚本会用当前 `HEAD` 的 commit 与时间生成条目（也可用 `COMMIT` / `PUBLISH_TIMESTAMP` 覆盖）。
+
 ## 运行时要求
 
 - DeepSeek Harness `>=0.2.1-rc.5`（`engines.dsh`），Node `>=22`
