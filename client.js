@@ -33,6 +33,12 @@ window.__ModuleLoader__.load({
     const PANEL_WIDTH = 292
     const ANCHOR_TOP = 56
     const ANCHOR_RIGHT = 14
+    /** Frame-wide top layer while the HUD is pinned above every host surface. */
+    const PINNED_Z = 2147483000
+    /** Ordinary overlay layer when the pin is off, so host chrome may cover it. */
+    const NORMAL_Z = 900
+    /** Unpinned, the HUD stays clear of the window title bar instead of landing on it. */
+    const TITLEBAR_SAFE = 44
     const DRAG_THRESHOLD = 5
     const EDGE_INSET = 4
 
@@ -211,6 +217,10 @@ window.__ModuleLoader__.load({
         '@keyframes dsh-hud-flash { from { background: color-mix(in srgb, var(--dsw-alias-brand-primary) 22%, transparent) } to { background: transparent } }',
         '@keyframes dsh-hud-pop { 0% { transform: scale(1) } 40% { transform: scale(1.16) } 100% { transform: scale(1) } }',
         '.dsh-hud-pill { transition: background .12s ease, border-color .12s ease, box-shadow .12s ease; }',
+        // The window title bar is an Electron drag region: an overlay parked on
+        // it still paints on top, but the OS takes the press for a window drag
+        // and the page never sees it. Opting the whole frame out restores clicks.
+        '.dsh-hud-root, .dsh-hud-root * { -webkit-app-region: no-drag; }',
         '.dsh-hud-pill:hover { background: color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, var(--dsw-alias-bg-overlay)); border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 40%, var(--dsw-alias-border-l1)); }',
         '.dsh-hud-pill:active { cursor: grabbing; }',
         '.dsh-hud-pill:focus-visible { outline: 2px solid var(--dsw-alias-brand-primary); outline-offset: 2px; }',
@@ -324,14 +334,14 @@ window.__ModuleLoader__.load({
       }
     }
 
-    function clampPosition(position, width, height) {
+    function clampPosition(position, width, height, minTop = EDGE_INSET) {
       const viewportWidth = Number(window.innerWidth) || 0
       const viewportHeight = Number(window.innerHeight) || 0
       const maxX = Math.max(EDGE_INSET, viewportWidth - width - EDGE_INSET)
-      const maxY = Math.max(EDGE_INSET, viewportHeight - height - EDGE_INSET)
+      const maxY = Math.max(minTop, viewportHeight - height - EDGE_INSET)
       return {
         x: Math.min(Math.max(EDGE_INSET, position.x), maxX),
-        y: Math.min(Math.max(EDGE_INSET, position.y), maxY),
+        y: Math.min(Math.max(minTop, position.y), maxY),
       }
     }
 
@@ -587,14 +597,19 @@ window.__ModuleLoader__.load({
       // The switches live in the plugin config on the Host; the page reads them
       // back once over `/state`. A Host too old to answer leaves them all on.
       const [animations, setAnimations] = useState(DEFAULT_ANIMATIONS)
+      // `alwaysOnTop` keeps the HUD above the whole interface, title bar
+      // included. It is a Host config switch; the page only mirrors it.
+      const [alwaysOnTop, setAlwaysOnTop] = useState(true)
       useEffect(() => {
         if (typeof fetch !== 'function') return undefined
         let live = true
         fetch(STATE_ENDPOINT)
           .then((response) => (response.ok ? response.json() : null))
           .then((body) => {
+            if (!live) return
+            if (typeof body?.alwaysOnTop === 'boolean') setAlwaysOnTop(body.alwaysOnTop)
             const next = body?.animations
-            if (!live || !next || typeof next !== 'object') return
+            if (!next || typeof next !== 'object') return
             setAnimations({
               expandAnimation: next.expandAnimation !== false,
               sessionAlert: next.sessionAlert !== false,
@@ -655,6 +670,10 @@ window.__ModuleLoader__.load({
         return () => clearTimeout(timer)
       }, [view.alerts, motion.completion])
 
+      // Pinned, the frame may reach the very top; unpinned it stops below the
+      // title bar, where host chrome would otherwise sit on top of it.
+      const minTop = alwaysOnTop ? EDGE_INSET : TITLEBAR_SAFE
+
       const beginDrag = (event) => {
         if (event.button !== undefined && event.button !== 0) return
         const wrapper = wrapRef.current
@@ -698,7 +717,7 @@ window.__ModuleLoader__.load({
         const next = clampPosition({
           x: drag.left + event.clientX - drag.startX,
           y: drag.top + event.clientY - drag.startY,
-        }, drag.width, drag.height)
+        }, drag.width, drag.height, minTop)
         positionRef.current = next
         setPosition(next)
         event.preventDefault()
@@ -721,7 +740,7 @@ window.__ModuleLoader__.load({
         const current = positionRef.current
         if (!wrapper || !current) return
         const rect = wrapper.getBoundingClientRect()
-        const next = clampPosition(current, rect.width, rect.height)
+        const next = clampPosition(current, rect.width, rect.height, minTop)
         if (next.x === current.x && next.y === current.y) return
         positionRef.current = next
         setPosition(next)
@@ -736,6 +755,12 @@ window.__ModuleLoader__.load({
       useEffect(() => {
         settlePosition()
       }, [open])
+
+      // Flipping the pin moves the frame between layers; re-clamp so an unpinned
+      // frame cannot keep sitting on the title bar it was pinned over.
+      useEffect(() => {
+        settlePosition()
+      }, [alwaysOnTop])
 
       // Clicking anywhere outside the panel, or pressing Escape, puts it away.
       useEffect(() => {
@@ -834,7 +859,7 @@ window.__ModuleLoader__.load({
       const container = {
         ref: wrapRef,
         className: 'dsh-hud-root',
-        style: { ...wrapStyle, ...anchor },
+        style: { ...wrapStyle, ...anchor, zIndex: alwaysOnTop ? PINNED_Z : NORMAL_Z },
       }
 
       const activeItems = activeRows.map((session) => {

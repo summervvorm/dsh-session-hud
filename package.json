@@ -1,6 +1,6 @@
 {
   "name": "dsh-session-hud",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Floating session-status HUD for DeepSeek Harness: running, waiting and finished session counts, with completion alerts that clear when the session is opened.",
   "type": "module",
   "main": "index.js",

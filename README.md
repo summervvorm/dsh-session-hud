@@ -28,6 +28,7 @@
 | 常驻胶囊 | 空闲时显示「空闲」，不会整块消失；只有提醒是可消失的 |
 | 可拖动 | 按住胶囊或面板标题拖动，位置写进浏览器本地存储 |
 | 点外面收起 | 点面板外任意位置或按 `Esc` 收起 |
+| **全局置顶** | 默认始终浮在整个界面之上（含窗口标题栏区域）且始终可点击；可在配置里关掉 |
 | 累计完成 | 每结束一轮 +1，**跨 harness 重启累加**（持久化在 `$DSH_HOME/state/dsh-session-hud.json`） |
 | 会话消歧 | 自动补 4 位会话号，同工作目录下的多个会话也能区分 |
 | 主题跟随 | 只用 `--dsw-alias-*` 主题 token，浅色/深色自动适配 |
@@ -67,6 +68,27 @@ plugin_manager: install_bundle, target = <本仓库绝对路径>
 2. **投稿到官方索引**：把 `plugins[0]` 这一条并入官方索引文档即可，字段与官方生成器一致。
 
 发新版本时：改 `package.json` 的 `version` → `node scripts/make-index.mjs` → 提交并推送。脚本会用当前 `HEAD` 的 commit 与时间生成条目（也可用 `COMMIT` / `PUBLISH_TIMESTAMP` 覆盖）。
+
+## 配置
+
+全部可选，写在本仓库 `cordis.patch.yml` 的该行 `config` 下（或 profile 的 patch 层里覆盖）：
+
+| 键 | 默认 | 作用 |
+|---|---|---|
+| `alwaysOnTop` | `true` | **全局置顶**：HUD 始终浮在整个界面之上（含窗口标题栏区域）并且可点击拖动。关掉后落到普通浮层，且不允许停到标题栏上 |
+| `expandAnimation` | `true` | 面板展开/收起过渡 |
+| `sessionAlert` | `true` | 会话进入「进行中/等待确认」列表时的高亮 |
+| `completionAlert` | `true` | 会话完成时提醒行与徽标的高亮 |
+
+```yaml
+- insert:
+    - id: dsh-session-hud
+      name: dsh-session-hud
+      config:
+        alwaysOnTop: false
+```
+
+系统开启「减少动态效果」时，三个动效开关等价于全部关闭。
 
 ## 运行时要求
 

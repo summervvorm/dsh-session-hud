@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.1 — 2026-11-11
+
+- Fix: the HUD was painted above the window title bar but could not be clicked
+  there — the title bar is an Electron drag region, which takes the press for a
+  window drag before the page sees it. The whole frame now sets
+  `-webkit-app-region: no-drag`, so parking it at the very top stays clickable
+  and draggable.
+- Add: `alwaysOnTop` config switch (default `true`). On, the frame stays in a
+  frame-wide top layer (above host chrome and the title bar); off, it drops to an
+  ordinary overlay layer and is clamped below the title bar.
+- Document all four config switches in `cordis.patch.yml` and the README.
+
 ## 1.0.0 — 2026-11-11
 
 First public release.

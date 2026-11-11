@@ -1,6 +1,15 @@
-# Inserts this bundle's single Host row. The plugin reads no config: every
-# behaviour (counts, alerts, drag position) is driven from session events and
-# the browser, so the row needs nothing beyond its name.
+# Inserts this bundle's single Host row.
+#
+# Config keys — all optional, and an omitted key keeps its default:
+#   expandAnimation  (bool, default true)  panel open/close transition
+#   sessionAlert     (bool, default true)  emphasis when a Session joins the lists
+#   completionAlert  (bool, default true)  emphasis when a Session finishes
+#   alwaysOnTop      (bool, default true)  keep the HUD above the whole interface,
+#                                          the window title bar included; off, it
+#                                          drops to an ordinary overlay layer and
+#                                          never parks on the title bar
 - insert:
     - id: dsh-session-hud
       name: dsh-session-hud
+      # config:
+      #   alwaysOnTop: true

@@ -60,9 +60,27 @@ export const Config = {
     version: 1,
     vendor: 'dsh-session-hud',
     validate(raw) {
-      return { value: normalizeAnimations(raw) }
+      return { value: { ...normalizeAnimations(raw), ...normalizeLayout(raw) } }
     },
   },
+}
+
+/**
+ * Layout switches. `alwaysOnTop` keeps the HUD above the whole interface — the
+ * window title bar included — instead of letting host layers cover it.
+ */
+export const DEFAULT_LAYOUT = {
+  alwaysOnTop: true,
+}
+
+const LAYOUT_KEYS = Object.keys(DEFAULT_LAYOUT)
+
+/** Same rule as the animations: an absent key keeps its default. */
+export function normalizeLayout(raw) {
+  const input = raw && typeof raw === 'object' ? raw : {}
+  const out = {}
+  for (const key of LAYOUT_KEYS) out[key] = typeof input[key] === 'boolean' ? input[key] : DEFAULT_LAYOUT[key]
+  return out
 }
 
 /** Tool names that suspend a Turn until the user answers. */
@@ -392,7 +410,7 @@ export function createEventsHandler(tracker, hub) {
 }
 
 /** One-shot snapshot plus the number of pages currently watching it. */
-export function createStateHandler(tracker, hub, view, animations = DEFAULT_ANIMATIONS) {
+export function createStateHandler(tracker, hub, view, animations = DEFAULT_ANIMATIONS, layout = DEFAULT_LAYOUT) {
   return (req, res) => {
     if (!isLocalRequest(req)) {
       res.writeHead(403, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
@@ -407,6 +425,7 @@ export function createStateHandler(tracker, hub, view, animations = DEFAULT_ANIM
       probeMode: view?.probeMode ?? '',
       probeKeys: view?.probeKeys ?? null,
       animations,
+      alwaysOnTop: layout?.alwaysOnTop !== false,
     })
     res.writeHead(200, {
       'content-type': 'application/json; charset=utf-8',
@@ -479,6 +498,7 @@ export function apply(ctx, config) {
   const logger = ctx.logger ?? console
   // The Client cannot see this process, so the switches ride along on `/state`.
   const animations = normalizeAnimations(config)
+  const layout = normalizeLayout(config)
   let titleService
   const tracker = createTracker({
     total: readTotal(),
@@ -552,7 +572,7 @@ export function apply(ctx, config) {
         () => httpCtx.webServer.register({
           kind: 'exact',
           path: STATE_ENDPOINT,
-          handler: createStateHandler(tracker, hub, view, animations),
+          handler: createStateHandler(tracker, hub, view, animations, layout),
         }),
         'dsh-session-hud: local snapshot endpoint',
       )
