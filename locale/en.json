@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Session Status HUD",
+    "description": "A floating panel at the top-right that counts running, waiting and finished sessions, and clears each completion alert once you open that session.",
+    "detail": "# Session Status HUD\n\nA small, always-available readout of what the harness is doing: how many sessions are **running**, how many **wait for you**, and how many have **finished**.\n\n## What you get\n\n- A pill in the top-right corner: `1 running · 2 waiting` plus a green `3 completed` badge when finished sessions are waiting to be read.\n- Click it (or let a completion open it) to see one row per session, with a 4-character session tag so sessions in the same workspace stay distinguishable.\n- **Open a session and its alert is gone.** The panel clears that row the moment the session becomes the visible one — no \"mark all read\" step.\n- **Finished work in a background session is what alerts.** A session you are already looking at never pops a notification for you.\n- The pill is draggable; its position is remembered. Click outside or press `Escape` to collapse it.\n- `Completed turns` accumulates across harness restarts.\n\n## Requirements\n\nDeepSeek Harness `>=0.2.1-rc.5` with the Web UI and the `webServer` service. No configuration is required."
+  }
+}
