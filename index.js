@@ -424,6 +424,8 @@ export function createStateHandler(tracker, hub, view, animations = DEFAULT_ANIM
       hudMode: view?.hudMode ?? '',
       probeMode: view?.probeMode ?? '',
       probeKeys: view?.probeKeys ?? null,
+      titleProbe: view?.titleProbe ?? null,
+      rowKeys: view?.rowKeys ?? null,
       animations,
       alwaysOnTop: layout?.alwaysOnTop !== false,
     })
@@ -483,8 +485,17 @@ export function createActiveHandler(view) {
           if (mode.startsWith('probe:')) view.probeMode = mode
           else view.hudMode = mode
         }
+        if (Array.isArray(parsed?.titles)) {
+          view.titleProbe = parsed.titles
+            .filter((title) => typeof title === 'string')
+            .slice(0, 10)
+            .map((title) => title.slice(0, 160))
+        }
         if (Array.isArray(parsed?.keys)) {
           view.probeKeys = parsed.keys.filter((key) => typeof key === 'string').slice(0, 40)
+        }
+        if (Array.isArray(parsed?.rowKeys)) {
+          view.rowKeys = parsed.rowKeys.filter((key) => typeof key === 'string').slice(0, 24)
         }
         reply(200, { ok: true, activeSessionId: view.activeSessionId })
       })
@@ -505,7 +516,10 @@ export function apply(ctx, config) {
     onTotal: (value) => writeTotal(value),
     sessionTitle: (session) => {
       try {
-        return titleService?.get?.(session) ?? ''
+        const value = titleService?.get?.(session)
+        // `get()` answers with the folded title record, not a bare string.
+        if (typeof value === 'string') return value
+        return typeof value?.title === 'string' ? value.title : ''
       } catch {
         return ''
       }

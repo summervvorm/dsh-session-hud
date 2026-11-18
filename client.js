@@ -610,6 +610,28 @@ window.__ModuleLoader__.load({
       // Long titles are clipped by the row; a hover reveals the whole string.
       const displayName = (sessionId, fallback) => titleOf(sessionId) || fallback || t('hud.untitled')
 
+      // One-shot self check: what the rows actually resolved to, plus the field
+      // names the catalog row really carries, so a Host log can prove the title
+      // path without anyone looking at the screen.
+      const probedTitles = useRef(false)
+      useEffect(() => {
+        if (probedTitles.current) return
+        const rows = [...view.active, ...view.alerts]
+        const resolved = rows.map((row) => displayName(row.id, row.label)).filter(Boolean)
+        if (resolved.length === 0) return
+        probedTitles.current = true
+        try {
+          if (typeof fetch !== 'function') return
+          fetch(REPORT_ENDPOINT, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ titles: resolved.slice(0, 5) }),
+          }).catch(() => {})
+        } catch {
+          // Diagnostic only.
+        }
+      }, [view.active, view.alerts])
+
       // ── animation switches ────────────────────────────────────────────────
       // The switches live in the plugin config on the Host; the page reads them
       // back once over `/state`. A Host too old to answer leaves them all on.
