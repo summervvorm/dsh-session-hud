@@ -16,6 +16,7 @@
     "client.js",
     "cordis.patch.yml",
     "locale/*.json",
+    "docs",
     "icon.svg",
     "CHANGELOG.md"
   ],

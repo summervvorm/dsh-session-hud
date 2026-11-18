@@ -16,6 +16,10 @@
   "untitled". Long titles are clipped with an ellipsis, and the row's `title`
   attribute reveals the whole string on hover.
 - Document all four config switches in `cordis.patch.yml` and the README.
+- Fix: `meta.detail` must be a package-relative `.md` path inside a subdirectory
+  (and listed in `files`), not inline Markdown. The declaration now points at
+  `docs/DETAIL.md` / `docs/DETAIL.zh.md`, which clears the Plugins page warning
+  "the detailed introduction file is invalid".
 
 ## 1.0.0 — 2026-11-11
 
