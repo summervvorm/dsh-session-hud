@@ -10,6 +10,11 @@
 - Add: `alwaysOnTop` config switch (default `true`). On, the frame stays in a
   frame-wide top layer (above host chrome and the title bar); off, it drops to an
   ordinary overlay layer and is clamped below the title bar.
+- Change: rows now show the **Session title** from the framework's Session
+  catalog (the same rows the sidebar lists) instead of the workspace folder plus
+  a 4-character id; a missing title falls back to the Host label, then to
+  "untitled". Long titles are clipped with an ellipsis, and the row's `title`
+  attribute reveals the whole string on hover.
 - Document all four config switches in `cordis.patch.yml` and the README.
 
 ## 1.0.0 — 2026-11-11

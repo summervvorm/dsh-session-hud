@@ -163,7 +163,6 @@ window.__ModuleLoader__.load({
     const actionRowStyle = { ...rowStyle, padding: '2px 4px' }
     const labelStyle = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
     const metaStyle = { color: token.secondary, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }
-    const idStyle = { marginLeft: 5, color: token.secondary, fontVariantNumeric: 'tabular-nums', fontSize: 11 }
     const sectionStyle = { color: token.secondary, fontSize: 11, letterSpacing: '0.02em' }
     const hintStyle = { color: token.secondary, fontSize: 11 }
     const readButtonStyle = {
@@ -375,10 +374,6 @@ window.__ModuleLoader__.load({
       return candidate.slice(0, 64)
     }
 
-    function shortIdOf(sessionId) {
-      return String(sessionId ?? '').replace(/^session-/u, '').slice(-4)
-    }
-
     function buildFromStream(snapshot, dismissed) {
       const counts = snapshot?.counts ?? { running: 0, waiting: 0, completed: 0 }
       const epoch = snapshot?.epoch ?? ''
@@ -387,7 +382,7 @@ window.__ModuleLoader__.load({
         .filter((session) => session && session.state !== 'idle')
         .map((session) => ({
           id: session.id,
-          label: cleanLabel(session.label) || shortIdOf(session.id),
+          label: cleanLabel(session.label),
           state: session.state === 'waiting' ? 'waiting' : 'running',
           detail: String(session.detail ?? ''),
           // When this Session entered its current non-idle state; the Host has
@@ -401,7 +396,7 @@ window.__ModuleLoader__.load({
         .map((entry) => ({
           key: `${entry.sessionId}#${entry.seq}`,
           id: entry.sessionId,
-          label: cleanLabel(entry.label) || shortIdOf(entry.sessionId),
+          label: cleanLabel(entry.label),
           at: Number(entry.at) || 0,
           failed: entry.failed === true,
         }))
@@ -592,6 +587,28 @@ window.__ModuleLoader__.load({
       }, [])
 
       const view = useMemo(() => buildFromStream(stream, dismissed), [stream, dismissed])
+
+      // ── session titles ────────────────────────────────────────────────────
+      // The Host hands the row's own label, which is usually the workspace
+      // folder. The framework's Session catalog carries the real title — the
+      // same text the sidebar shows — so prefer it when the root seat exposes
+      // the hook. A composition without it keeps the Host label.
+      const useSessions = typeof slotProps.useSessions === 'function' ? slotProps.useSessions : null
+      let catalog
+      try {
+        catalog = useSessions ? useSessions() : undefined
+      } catch {
+        catalog = undefined
+      }
+      const titleOf = (sessionId) => {
+        const byId = catalog?.byId
+        if (!byId) return ''
+        const row = byId instanceof Map ? byId.get(sessionId) : byId[sessionId]
+        const title = typeof row?.title === 'string' ? row.title.trim() : ''
+        return title.replace(/\s+/gu, ' ')
+      }
+      // Long titles are clipped by the row; a hover reveals the whole string.
+      const displayName = (sessionId, fallback) => titleOf(sessionId) || fallback || t('hud.untitled')
 
       // ── animation switches ────────────────────────────────────────────────
       // The switches live in the plugin config on the Host; the page reads them
@@ -873,9 +890,8 @@ window.__ModuleLoader__.load({
           style: actionRowStyle,
         },
         h('span', { style: session.state === 'waiting' ? DOT_WAITING : DOT_RUNNING, 'aria-hidden': true }),
-        h('span', { style: labelStyle, title: session.label },
-          session.label,
-          h('span', { style: idStyle }, shortIdOf(session.id))),
+        h('span', { style: labelStyle, title: displayName(session.id, session.label) },
+          displayName(session.id, session.label)),
         h('span', { style: metaStyle },
           describe(session, t),
           elapsed ? ` · ${elapsed}` : ''),
@@ -904,9 +920,8 @@ window.__ModuleLoader__.load({
         title: view.mode === 'stream' ? t('hud.read') : t('hud.hint'),
       },
       h('span', { style: alert.failed ? DOT_FAILED : DOT_DONE, 'aria-hidden': true }),
-      h('span', { style: labelStyle, title: alert.label },
-        alert.label,
-        h('span', { style: idStyle }, shortIdOf(alert.id))),
+      h('span', { style: labelStyle, title: displayName(alert.id, alert.label) },
+        displayName(alert.id, alert.label)),
       h('span', { style: metaStyle }, clockOf(alert.at)),
       ))
 
